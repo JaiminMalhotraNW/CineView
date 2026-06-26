@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { getImageUrl, searchMulti } from '../../Common/core/api'
-import type { Movie, Person, TVShow } from '../../Common/core/schemas'
 import { Link, useSearchParams } from 'react-router-dom'
-
+import { useTranslation } from 'react-i18next'
+import { getImageUrl, searchMulti } from '../../Common/core/api'
+import { theme } from '../../Common/core/themeClasses'
+import type { Movie, Person, TVShow } from '../../Common/core/schemas'
 
 const RECENT_SEARCHES_KEY = 'cineview_recent_searches'
 const MAX_RECENT_SEARCHES = 5
@@ -36,7 +37,7 @@ function saveRecentSearch(query: string) {
 
 function PosterPlaceholder({ label }: { label: string }) {
   return (
-    <div className="flex aspect-[2/3] w-full items-center justify-center rounded-lg bg-zinc-800 p-3 text-center text-sm text-zinc-400">
+    <div className={`aspect-[2/3] w-full ${theme.placeholderBox}`}>
       {label}
     </div>
   )
@@ -57,7 +58,7 @@ function SearchMovieCard({ movie }: { movie: Movie }) {
       ) : (
         <PosterPlaceholder label={movie.title} />
       )}
-      <p className="mt-2 line-clamp-2 text-sm font-medium text-white group-hover:text-red-400">
+      <p className={`mt-2 line-clamp-2 text-sm font-medium ${theme.linkTitle}`}>
         {movie.title}
       </p>
     </Link>
@@ -79,7 +80,7 @@ function SearchTvCard({ show }: { show: TVShow }) {
       ) : (
         <PosterPlaceholder label={show.name} />
       )}
-      <p className="mt-2 line-clamp-2 text-sm font-medium text-white group-hover:text-red-400">
+      <p className={`mt-2 line-clamp-2 text-sm font-medium ${theme.linkTitle}`}>
         {show.name}
       </p>
     </Link>
@@ -99,19 +100,24 @@ function SearchPersonCard({ person }: { person: Person }) {
           loading="lazy"
         />
       ) : (
-        <div className="mx-auto flex aspect-square w-full max-w-[140px] items-center justify-center rounded-full bg-zinc-800 text-sm text-zinc-400">
+        <div
+          className={`mx-auto aspect-square w-full max-w-[140px] ${theme.avatarPlaceholder}`}
+        >
           {person.name.slice(0, 1)}
         </div>
       )}
-      <p className="mt-2 text-sm font-medium text-white">{person.name}</p>
+      <p className={`mt-2 text-sm font-medium ${theme.heading}`}>{person.name}</p>
       {person.known_for_department && (
-        <p className="text-xs text-zinc-500">{person.known_for_department}</p>
+        <p className={`text-xs ${theme.hint}`}>{person.known_for_department}</p>
       )}
     </div>
   )
 }
 
 export function SearchPage() {
+  const { t } = useTranslation()
+  const [searchParams] = useSearchParams()
+
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const [recentSearches, setRecentSearches] = useState<string[]>([])
@@ -120,21 +126,17 @@ export function SearchPage() {
   const [people, setPeople] = useState<Person[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  
-  
-  const [searchParams] = useSearchParams()
 
   useEffect(() => {
     setRecentSearches(loadRecentSearches())
   }, [])
-  // Read ?q= from URL (Navbar submits here)
+
   useEffect(() => {
     const q = searchParams.get('q')
     if (q !== null) {
       setQuery(q)
       setDebouncedQuery(q.trim())
-    }
-    else {
+    } else {
       setQuery('')
       setDebouncedQuery('')
     }
@@ -144,6 +146,7 @@ export function SearchPage() {
     const timer = window.setTimeout(() => {
       setDebouncedQuery(query.trim())
     }, 500)
+
     return () => window.clearTimeout(timer)
   }, [query])
 
@@ -173,7 +176,7 @@ export function SearchPage() {
         setRecentSearches(loadRecentSearches())
       } catch {
         if (!cancelled) {
-          setError('Search failed. Please try again.')
+          setError(t('search.failed'))
         }
       } finally {
         if (!cancelled) setIsLoading(false)
@@ -185,7 +188,7 @@ export function SearchPage() {
     return () => {
       cancelled = true
     }
-  }, [debouncedQuery])
+  }, [debouncedQuery, t])
 
   const showRecent = query.trim().length === 0 && recentSearches.length > 0
   const hasResults = movies.length > 0 || tvShows.length > 0 || people.length > 0
@@ -193,9 +196,11 @@ export function SearchPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-white">Search</h1>
-        <p className="mt-2 text-sm text-zinc-400">
-          Find movies, TV shows, and people
+        <h1 className={`text-2xl font-bold ${theme.heading}`}>
+          {t('search.title')}
+        </h1>
+        <p className={`mt-2 text-sm ${theme.subheading}`}>
+          {t('search.subtitle')}
         </p>
       </div>
 
@@ -203,14 +208,16 @@ export function SearchPage() {
         type="search"
         value={query}
         onChange={(event) => setQuery(event.target.value)}
-        placeholder="Search movies, shows, people..."
-        className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-white outline-none transition focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+        placeholder={t('search.placeholder')}
+        className={theme.inputLg}
       />
 
       {showRecent && (
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-400">
-            Recent Searches
+          <h2
+            className={`text-sm font-semibold uppercase tracking-wide ${theme.subheading}`}
+          >
+            {t('search.recentSearches')}
           </h2>
           <div className="flex flex-wrap gap-2">
             {recentSearches.map((item) => (
@@ -218,7 +225,7 @@ export function SearchPage() {
                 key={item}
                 type="button"
                 onClick={() => setQuery(item)}
-                className="rounded-full border border-zinc-700 bg-zinc-900 px-4 py-2 text-sm text-zinc-300 transition hover:border-red-500 hover:text-white"
+                className={theme.recentChip}
               >
                 {item}
               </button>
@@ -228,24 +235,22 @@ export function SearchPage() {
       )}
 
       {isLoading && (
-        <p className="text-sm text-zinc-400">Searching...</p>
+        <p className={`text-sm ${theme.subheading}`}>{t('search.searching')}</p>
       )}
 
-      {error && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
-          {error}
-        </div>
-      )}
+      {error && <div className={theme.errorBox}>{error}</div>}
 
       {!isLoading && debouncedQuery && !hasResults && !error && (
-        <p className="text-sm text-zinc-400">
-          No results found for &quot;{debouncedQuery}&quot;.
+        <p className={`text-sm ${theme.subheading}`}>
+          {t('search.noResults', { query: debouncedQuery })}
         </p>
       )}
 
       {movies.length > 0 && (
         <section className="space-y-4">
-          <h2 className="text-xl font-semibold text-white">Movies</h2>
+          <h2 className={`text-xl font-semibold ${theme.heading}`}>
+            {t('search.movies')}
+          </h2>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             {movies.map((movie) => (
               <SearchMovieCard key={movie.id} movie={movie} />
@@ -256,7 +261,9 @@ export function SearchPage() {
 
       {tvShows.length > 0 && (
         <section className="space-y-4">
-          <h2 className="text-xl font-semibold text-white">TV Shows</h2>
+          <h2 className={`text-xl font-semibold ${theme.heading}`}>
+            {t('search.tvShows')}
+          </h2>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             {tvShows.map((show) => (
               <SearchTvCard key={show.id} show={show} />
@@ -267,7 +274,9 @@ export function SearchPage() {
 
       {people.length > 0 && (
         <section className="space-y-4">
-          <h2 className="text-xl font-semibold text-white">People</h2>
+          <h2 className={`text-xl font-semibold ${theme.heading}`}>
+            {t('search.people')}
+          </h2>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
             {people.map((person) => (
               <SearchPersonCard key={person.id} person={person} />

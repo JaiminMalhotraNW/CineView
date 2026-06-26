@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 import { authStore } from '../data/AuthStore'
+import { theme } from '../../Common/core/themeClasses'
 
 const loginSchema = z.object({
   email: z.email('Please enter a valid email address'),
@@ -116,26 +117,25 @@ export const LoginPage = observer(function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-4">
-      <div className="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900 p-8 shadow-2xl shadow-black/40">
+    <div className={`flex min-h-screen items-center justify-center px-4 ${theme.page}`}>
+      <div className={`w-full max-w-md p-8 ${theme.cardShadow}`}>
         <div className="mb-8 text-center">
           <div className="mb-4 inline-flex items-center justify-center rounded-xl bg-red-600/10 px-4 py-2">
-            <span className="text-2xl font-bold tracking-tight text-white">
+            <span className={`text-2xl font-bold tracking-tight ${theme.logo}`}>
               Cine <span className="text-red-500">View</span>
             </span>
           </div>
-          <h1 className="text-2xl font-semibold text-white">Welcome Back</h1>
-          <p className="mt-2 text-sm text-zinc-400">
+          <h1 className={`text-2xl font-semibold ${theme.heading}`}>
+            Welcome Back
+          </h1>
+          <p className={`mt-2 text-sm ${theme.subheading}`}>
             Sign in to continue exploring movies and shows
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5" noValidate>
           <div>
-            <label
-              htmlFor="email"
-              className="mb-2 block text-sm font-medium text-zinc-300"
-            >
+            <label htmlFor="email" className={`mb-2 block text-sm font-medium ${theme.label}`}>
               Email
             </label>
             <input
@@ -144,19 +144,18 @@ export const LoginPage = observer(function LoginPage() {
               autoComplete="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-4 py-2.5 text-white outline-none transition focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+              className={theme.input}
               placeholder="name@example.com"
             />
             {fieldErrors.email && (
-              <p className="mt-2 text-sm text-red-400">{fieldErrors.email}</p>
+              <p className="mt-2 text-sm text-red-500 dark:text-red-400">
+                {fieldErrors.email}
+              </p>
             )}
           </div>
 
           <div>
-            <label
-              htmlFor="password"
-              className="mb-2 block text-sm font-medium text-zinc-300"
-            >
+            <label htmlFor="password" className={`mb-2 block text-sm font-medium ${theme.label}`}>
               Password
             </label>
             <div className="relative">
@@ -166,13 +165,13 @@ export const LoginPage = observer(function LoginPage() {
                 autoComplete="current-password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-4 py-2.5 pr-11 text-white outline-none transition focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                className={`${theme.input} pr-11`}
                 placeholder="Enter your password"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((current) => !current)}
-                className="absolute inset-y-0 right-0 flex items-center px-3 text-zinc-400 transition hover:text-white"
+                className={`absolute inset-y-0 right-0 flex items-center px-3 ${theme.muted} transition hover:text-zinc-900 dark:hover:text-white`}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? (
@@ -183,24 +182,20 @@ export const LoginPage = observer(function LoginPage() {
               </button>
             </div>
             {fieldErrors.password && (
-              <p className="mt-2 text-sm text-red-400">{fieldErrors.password}</p>
+              <p className="mt-2 text-sm text-red-500 dark:text-red-400">
+                {fieldErrors.password}
+              </p>
             )}
           </div>
 
-          {authError && (
-            <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
-              {authError}
-            </div>
-          )}
+          {authError && <div className={theme.errorBox}>{authError}</div>}
 
-          <button
-            type="submit"
-            className="w-full rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/40"
-          >
+          <button type="submit" className={`w-full ${theme.btnPrimary}`}>
             Sign In
           </button>
         </form>
       </div>
     </div>
   )
+
 })

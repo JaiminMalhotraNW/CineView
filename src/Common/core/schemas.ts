@@ -97,3 +97,20 @@ export type Person = z.infer<typeof PersonSchema>
 export type Video = z.infer<typeof VideoSchema>
 export type CastMember = z.infer<typeof CastMemberSchema>
 export type MovieDetails = z.infer<typeof MovieDetailsSchema>
+
+export const PaginatedTrendingSchema = z.object({
+  page: z.number(),
+  results: z.array(z.unknown()),
+  total_pages: z.number(),
+  total_results: z.number(),
+})
+
+export const TVShowDetailsSchema = TVShowSchema.extend({
+  videos: z
+    .object({
+      results: z.array(VideoSchema),
+    })
+    .optional(),
+})
+
+export type TVShowDetails = z.infer<typeof TVShowDetailsSchema>

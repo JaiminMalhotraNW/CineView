@@ -1,1 +1,17 @@
 @import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+html {
+  @apply bg-zinc-50 text-zinc-900 antialiased;
+}
+
+html.dark {
+  @apply bg-zinc-950 text-white;
+}
+
+/* Native select/options in dark mode */
+.dark select option {
+  background-color: #18181b;
+  color: #fafafa;
+}

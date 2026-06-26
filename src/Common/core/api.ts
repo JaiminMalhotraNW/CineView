@@ -1,17 +1,22 @@
 import { z } from 'zod'
+import { preferencesStore } from '../../Preferences/data/PreferencesStore'
+import { getTmdbLanguage } from '../../Preferences/core/i18n'
 import {
   GenresResponseSchema,
   MovieDetailsSchema,
   MovieSchema,
   MultiSearchResponseSchema,
   PaginatedMoviesSchema,
+  PaginatedTrendingSchema,
   PersonSchema,
+  TVShowDetailsSchema,
   TVShowSchema,
   type Genre,
   type Movie,
   type MovieDetails,
   type Person,
   type TVShow,
+  type TVShowDetails,
 } from './schemas'
 
 const BASE_URL = import.meta.env.VITE_TMDB_BASE_URL
@@ -20,15 +25,38 @@ const IMAGE_BASE_URL =
   import.meta.env.VITE_TMDB_IMAGE_BASE_URL ?? 'https://image.tmdb.org/t/p'
 
 export class ApiError extends Error {
-  status: number;
+  status: number
   constructor(status: number, message: string) {
-    super(message);
-    this.status = status;
-    this.name = 'ApiError';
+    super(message)
+    this.status = status
+    this.name = 'ApiError'
   }
 }
 
 export type ImageSize = 'w185' | 'w500' | 'w780' | 'original'
+
+export type HeroItem = {
+  id: number
+  mediaType: 'movie' | 'tv'
+  title: string
+  overview: string
+  backdrop_path: string | null
+  vote_average: number
+}
+
+export type SearchResults = {
+  movies: Movie[]
+  tvShows: TVShow[]
+  people: Person[]
+}
+
+type VideosResponse = {
+  results: Array<{
+    site: string
+    type: string
+    key: string
+  }>
+}
 
 export function getImageUrl(
   path: string | null | undefined,
@@ -36,12 +64,6 @@ export function getImageUrl(
 ): string | null {
   if (!path) return null
   return `${IMAGE_BASE_URL}/${size}${path}`
-}
-
-export type SearchResults = {
-  movies: Movie[]
-  tvShows: TVShow[]
-  people: Person[]
 }
 
 async function tmdbFetch<T>(
@@ -56,7 +78,7 @@ async function tmdbFetch<T>(
     )
   }
 
-  const response = await fetch(`${BASE_URL}${path}`, {
+  const response = await fetch(`${BASE_URL}${withLocale(path)}`, {
     ...init,
     headers: {
       Authorization: `Bearer ${ACCESS_TOKEN}`,
@@ -74,6 +96,14 @@ async function tmdbFetch<T>(
 
   const json: unknown = await response.json()
   return schema.parse(json)
+}
+
+function withLocale(path: string): string {
+  const language = getTmdbLanguage(preferencesStore.language)
+  const region = preferencesStore.region
+  const separator = path.includes('?') ? '&' : '?'
+
+  return `${path}${separator}language=${language}&region=${region}`
 }
 
 function parseSearchResults(results: unknown[]): SearchResults {
@@ -106,6 +136,56 @@ function parseSearchResults(results: unknown[]): SearchResults {
   }
 
   return { movies, tvShows, people }
+}
+
+function toHeroItem(record: unknown): HeroItem | null {
+  if (typeof record !== 'object' || record === null) return null
+
+  const mediaType = (record as Record<string, unknown>).media_type
+
+  if (mediaType === 'movie') {
+    const parsed = MovieSchema.safeParse(record)
+    if (!parsed.success || !parsed.data.backdrop_path) return null
+
+    return {
+      id: parsed.data.id,
+      mediaType: 'movie',
+      title: parsed.data.title,
+      overview: parsed.data.overview,
+      backdrop_path: parsed.data.backdrop_path,
+      vote_average: parsed.data.vote_average,
+    }
+  }
+
+  if (mediaType === 'tv') {
+    const parsed = TVShowSchema.safeParse(record)
+    if (!parsed.success || !parsed.data.backdrop_path) return null
+
+    return {
+      id: parsed.data.id,
+      mediaType: 'tv',
+      title: parsed.data.name,
+      overview: parsed.data.overview,
+      backdrop_path: parsed.data.backdrop_path,
+      vote_average: parsed.data.vote_average,
+    }
+  }
+
+  return null
+}
+
+export async function fetchTrendingAll(limit = 10): Promise<HeroItem[]> {
+  const data = await tmdbFetch('/trending/all/day', PaginatedTrendingSchema)
+  const items: HeroItem[] = []
+
+  for (const result of data.results) {
+    const item = toHeroItem(result)
+    if (!item) continue
+    items.push(item)
+    if (items.length >= limit) break
+  }
+
+  return items
 }
 
 export async function fetchTrending(): Promise<Movie[]> {
@@ -152,8 +232,15 @@ export async function fetchMovieDetails(id: number): Promise<MovieDetails> {
   )
 }
 
+export async function fetchTVShowDetails(id: number): Promise<TVShowDetails> {
+  return tmdbFetch(
+    `/tv/${id}?append_to_response=videos`,
+    TVShowDetailsSchema,
+  )
+}
+
 export function findYouTubeTrailer(
-  videos: MovieDetails['videos'],
+  videos: VideosResponse | undefined,
 ): string | null {
   const trailer = videos?.results.find(
     (video) => video.site === 'YouTube' && video.type === 'Trailer',

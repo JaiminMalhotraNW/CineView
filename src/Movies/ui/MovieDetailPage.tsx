@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import {
   fetchMovieDetails,
   findYouTubeTrailer,
   getImageUrl,
 } from '../../Common/core/api'
+import { theme } from '../../Common/core/themeClasses'
 import type { MovieDetails } from '../../Common/core/schemas'
 import { ContentRow } from './ContentRow'
 import { TrailerModal } from './TrailerModal'
@@ -12,7 +14,9 @@ import { TrailerModal } from './TrailerModal'
 type PageState = 'loading' | 'success' | 'error'
 
 export function MovieDetailPage() {
+  const { t } = useTranslation()
   const { id } = useParams()
+
   const [pageState, setPageState] = useState<PageState>('loading')
   const [movie, setMovie] = useState<MovieDetails | null>(null)
   const [trailerKey, setTrailerKey] = useState<string | null>(null)
@@ -54,25 +58,25 @@ export function MovieDetailPage() {
 
   if (pageState === 'loading') {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center text-zinc-400">
-        Loading movie details...
+      <div
+        className={`flex min-h-[50vh] items-center justify-center ${theme.subheading}`}
+      >
+        {t('movies.loadingDetails')}
       </div>
     )
   }
 
   if (pageState === 'error' || !movie) {
     return (
-      <div className="mx-auto max-w-lg rounded-2xl border border-zinc-800 bg-zinc-900 p-8 text-center">
-        <h1 className="text-2xl font-bold text-white">Movie Not Found</h1>
-        <p className="mt-3 text-sm text-zinc-400">
-          We couldn&apos;t load this movie. The ID may be invalid or the
-          request failed.
+      <div className={`mx-auto max-w-lg p-8 text-center ${theme.card}`}>
+        <h1 className={`text-2xl font-bold ${theme.heading}`}>
+          {t('movies.movieNotFound')}
+        </h1>
+        <p className={`mt-3 text-sm ${theme.subheading}`}>
+          {t('movies.movieNotFoundDescription')}
         </p>
-        <Link
-          to="/"
-          className="mt-6 inline-block rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500"
-        >
-          Back to Home
+        <Link to="/" className={`mt-6 inline-block ${theme.btnPrimary}`}>
+          {t('movies.backToHome')}
         </Link>
       </div>
     )
@@ -94,12 +98,13 @@ export function MovieDetailPage() {
             className="absolute inset-0 h-full w-full object-cover"
           />
         ) : (
-          <div className="absolute inset-0 bg-zinc-900" />
+          <div className={theme.heroFallback} />
         )}
 
-        <div className="absolute inset-0 bg-gradient-to-r from-zinc-950 via-zinc-950/90 to-zinc-950/40" />
+        <div className={theme.heroOverlay} />
+        <div className={theme.heroOverlayBottom} />
 
-        <div className="relative grid gap-6 p-6 md:grid-cols-[180px_1fr] md:p-8">
+        <div className="relative grid gap-6 p-6 text-white md:grid-cols-[180px_1fr] md:p-8">
           {posterUrl ? (
             <img
               src={posterUrl}
@@ -107,17 +112,17 @@ export function MovieDetailPage() {
               className="w-full rounded-xl object-cover shadow-lg"
             />
           ) : (
-            <div className="flex min-h-[270px] items-center justify-center rounded-xl bg-zinc-800 p-4 text-center text-zinc-400">
+            <div
+              className={`flex min-h-[270px] items-center justify-center rounded-xl p-4 text-center ${theme.placeholderBox}`}
+            >
               {movie.title}
             </div>
           )}
 
           <div>
-            <h1 className="text-3xl font-bold text-white md:text-4xl">
-              {movie.title}
-            </h1>
+            <h1 className="text-3xl font-bold md:text-4xl">{movie.title}</h1>
 
-            <div className="mt-4 flex flex-wrap gap-3 text-sm text-zinc-300">
+            <div className="mt-4 flex flex-wrap gap-3 text-sm text-zinc-200">
               <span className="rounded-md bg-yellow-500/15 px-3 py-1 font-semibold text-yellow-400">
                 ★ {movie.vote_average.toFixed(1)}
               </span>
@@ -130,7 +135,7 @@ export function MovieDetailPage() {
                 {movie.genres.map((genre) => (
                   <span
                     key={genre.id}
-                    className="rounded-full border border-zinc-700 px-3 py-1 text-xs text-zinc-300"
+                    className="rounded-full border border-white/20 bg-black/30 px-3 py-1 text-xs text-zinc-100"
                   >
                     {genre.name}
                   </span>
@@ -138,17 +143,17 @@ export function MovieDetailPage() {
               </div>
             )}
 
-            <p className="mt-6 max-w-3xl text-sm leading-7 text-zinc-300 md:text-base">
-              {movie.overview || 'No overview available.'}
+            <p className="mt-6 max-w-3xl text-sm leading-7 text-zinc-200 md:text-base">
+              {movie.overview || t('movies.noOverview')}
             </p>
 
             {youtubeTrailerKey && (
               <button
                 type="button"
                 onClick={() => setTrailerKey(youtubeTrailerKey)}
-                className="mt-6 rounded-lg bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-red-500"
+                className={`mt-6 ${theme.btnPrimary}`}
               >
-                Watch Trailer
+                {t('movies.watchTrailer')}
               </button>
             )}
           </div>
@@ -157,29 +162,35 @@ export function MovieDetailPage() {
 
       {cast.length > 0 && (
         <section className="space-y-4">
-          <h2 className="text-xl font-semibold text-white">Cast</h2>
+          <h2 className={`text-xl font-semibold ${theme.heading}`}>
+            {t('movies.cast')}
+          </h2>
           <div className="flex gap-4 overflow-x-auto pb-2">
             {cast.map((member) => {
-              const profileUrl = getImageUrl(member.profile_path, 'w185')
+              const profileUrl = getImageUrl(member.profile_path, 'w500')
 
               return (
-                <article key={member.id} className="w-28 shrink-0 text-center">
+                <article key={member.id} className="w-36 shrink-0 text-center">
                   {profileUrl ? (
                     <img
                       src={profileUrl}
                       alt={member.name}
-                      className="mx-auto aspect-square w-24 rounded-full object-cover"
+                      className="mx-auto aspect-square w-32 rounded-full object-cover"
                       loading="lazy"
                     />
                   ) : (
-                    <div className="mx-auto flex aspect-square w-24 items-center justify-center rounded-full bg-zinc-800 text-sm text-zinc-400">
+                    <div
+                      className={`mx-auto aspect-square w-32 ${theme.avatarPlaceholder}`}
+                    >
                       {member.name.slice(0, 1)}
                     </div>
                   )}
-                  <p className="mt-2 line-clamp-2 text-sm font-medium text-white">
+                  <p
+                    className={`mt-2 line-clamp-2 text-sm font-medium ${theme.heading}`}
+                  >
                     {member.name}
                   </p>
-                  <p className="line-clamp-2 text-xs text-zinc-500">
+                  <p className={`line-clamp-2 text-xs ${theme.hint}`}>
                     {member.character}
                   </p>
                 </article>
@@ -190,7 +201,7 @@ export function MovieDetailPage() {
       )}
 
       {similarMovies.length > 0 && (
-        <ContentRow title="Similar Movies" movies={similarMovies} />
+        <ContentRow title={t('movies.similarMovies')} movies={similarMovies} />
       )}
 
       {trailerKey && (

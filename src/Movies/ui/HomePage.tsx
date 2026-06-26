@@ -1,17 +1,22 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { theme } from '../../Common/core/themeClasses'
 import { SectionErrorBoundary } from '../../Common/ui/SectionErrorBoundary'
 import {
   fetchGenres,
   fetchMoviesByGenre,
   fetchPopularMovies,
   fetchMovieDetails,
+  fetchTVShowDetails,
   fetchTrending,
+  fetchTrendingAll,
   findYouTubeTrailer,
+  type HeroItem,
 } from '../../Common/core/api'
 import type { Genre, Movie } from '../../Common/core/schemas'
 import { ContentRow } from './ContentRow'
 import { GenreFilter } from './GenreFilter'
-import { HeroBanner } from './HeroBanner'
+import { HeroCarousel } from './HeroCarousel'
 import { TrailerModal } from './TrailerModal'
 
 function filterByGenre(movies: Movie[], genreId: number | null) {
@@ -20,6 +25,9 @@ function filterByGenre(movies: Movie[], genreId: number | null) {
 }
 
 export function HomePage() {
+  const { t } = useTranslation()
+
+  const [heroItems, setHeroItems] = useState<HeroItem[]>([])
   const [trending, setTrending] = useState<Movie[]>([])
   const [popular, setPopular] = useState<Movie[]>([])
   const [genres, setGenres] = useState<Genre[]>([])
@@ -40,20 +48,23 @@ export function HomePage() {
       setError(null)
 
       try {
-        const [trendingData, popularData, genreData] = await Promise.all([
-          fetchTrending(),
-          fetchPopularMovies(),
-          fetchGenres(),
-        ])
+        const [heroData, trendingData, popularData, genreData] =
+          await Promise.all([
+            fetchTrendingAll(10),
+            fetchTrending(),
+            fetchPopularMovies(),
+            fetchGenres(),
+          ])
 
         if (cancelled) return
 
+        setHeroItems(heroData)
         setTrending(trendingData)
         setPopular(popularData)
         setGenres(genreData)
       } catch {
         if (!cancelled) {
-          setError('Failed to load discovery content. Please try again later.')
+          setError(t('movies.loadFailed'))
         }
       } finally {
         if (!cancelled) setIsLoading(false)
@@ -65,7 +76,7 @@ export function HomePage() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     if (activeGenreId === null) {
@@ -88,8 +99,6 @@ export function HomePage() {
     }
   }, [activeGenreId])
 
-  const featuredMovie = trending[0] ?? null
-
   const filteredTrending = useMemo(
     () => filterByGenre(trending, activeGenreId),
     [trending, activeGenreId],
@@ -100,52 +109,51 @@ export function HomePage() {
     [popular, activeGenreId],
   )
 
-  const handleWatchTrailer = async () => {
-    if (!featuredMovie) return
-
+  const handleWatchTrailer = async (item: HeroItem) => {
     try {
-      const details = await fetchMovieDetails(featuredMovie.id)
+      const details =
+        item.mediaType === 'movie'
+          ? await fetchMovieDetails(item.id)
+          : await fetchTVShowDetails(item.id)
+
       const key = findYouTubeTrailer(details.videos)
 
       if (key) {
         setTrailerKey(key)
-        setTrailerTitle(featuredMovie.title)
+        setTrailerTitle(item.title)
         return
       }
 
-      setError('No trailer available for this title.')
+      setError(t('movies.noTrailer'))
     } catch {
-      setError('Unable to load trailer.')
+      setError(t('movies.trailerLoadFailed'))
     }
   }
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center text-zinc-400">
-        Loading discovery content...
+      <div
+        className={`flex min-h-[50vh] items-center justify-center ${theme.subheading}`}
+      >
+        {t('movies.loadingDiscovery')}
       </div>
     )
   }
 
-  if (error && !featuredMovie) {
-    return (
-      <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-6 text-center text-red-300">
-        {error}
-      </div>
-    )
+  if (error && heroItems.length === 0) {
+    return <div className={theme.errorBoxLg}>{error}</div>
   }
 
   return (
     <div className="space-y-8">
-      {error && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
-          {error}
-        </div>
-      )}
+      {error && <div className={theme.errorBox}>{error}</div>}
 
-      {featuredMovie && (
+      {heroItems.length > 0 && (
         <SectionErrorBoundary>
-          <HeroBanner movie={featuredMovie} onWatchTrailer={handleWatchTrailer} />
+          <HeroCarousel
+            items={heroItems}
+            onWatchTrailer={handleWatchTrailer}
+          />
         </SectionErrorBoundary>
       )}
 
@@ -156,11 +164,11 @@ export function HomePage() {
       />
 
       <SectionErrorBoundary>
-        <ContentRow title="Trending" movies={filteredTrending} />
+        <ContentRow title={t('movies.trending')} movies={filteredTrending} />
       </SectionErrorBoundary>
 
       <SectionErrorBoundary>
-        <ContentRow title="Popular" movies={filteredPopular} />
+        <ContentRow title={t('movies.popular')} movies={filteredPopular} />
       </SectionErrorBoundary>
 
       {activeGenreId !== null && (
