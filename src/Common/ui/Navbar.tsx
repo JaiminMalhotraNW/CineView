@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { observer } from 'mobx-react-lite'
-import { NavLink, useLocation, useNavigate } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { authStore } from '../../Auth/data/AuthStore'
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
