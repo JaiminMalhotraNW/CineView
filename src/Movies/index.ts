@@ -1,2 +1,6 @@
+export { ContentRow } from './ui/ContentRow'
+export { GenreFilter } from './ui/GenreFilter'
+export { HeroBanner } from './ui/HeroBanner'
 export { HomePage } from './ui/HomePage'
+export { MovieCard } from './ui/MovieCard'
 export { MovieDetailPage } from './ui/MovieDetailPage'
