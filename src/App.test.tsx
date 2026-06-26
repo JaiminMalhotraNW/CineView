@@ -1,10 +1,16 @@
 import { render, screen } from '@testing-library/react'
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import App from './App'
+import { authStore } from './Auth'
 
 describe('App', () => {
-  it('renders the home page on /', () => {
+  beforeEach(() => {
+    sessionStorage.clear()
+    authStore.logout()
+  })
+
+  it('redirects unauthenticated users to login', () => {
     render(<App />)
-    expect(screen.getByText('HomePage')).toBeTruthy()
+    expect(screen.getByText('Welcome Back')).toBeTruthy()
   })
 })
