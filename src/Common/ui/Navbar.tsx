@@ -13,7 +13,6 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
 
 export const Navbar = observer(function Navbar() {
   const navigate = useNavigate()
-  const location = useLocation()
   const [searchQuery, setSearchQuery] = useState('')
 
   const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {

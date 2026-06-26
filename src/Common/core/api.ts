@@ -20,12 +20,11 @@ const IMAGE_BASE_URL =
   import.meta.env.VITE_TMDB_IMAGE_BASE_URL ?? 'https://image.tmdb.org/t/p'
 
 export class ApiError extends Error {
-  constructor(
-    public status: number,
-    message: string,
-  ) {
-    super(message)
-    this.name = 'ApiError'
+  status: number;
+  constructor(status: number, message: string) {
+    super(message);
+    this.status = status;
+    this.name = 'ApiError';
   }
 }
 
