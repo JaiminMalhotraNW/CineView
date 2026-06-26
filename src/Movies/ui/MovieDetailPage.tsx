@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { WatchlistToggle } from '../../Collection/ui/WatchlistToggle'
 import { useTranslation } from 'react-i18next'
 import {
   fetchMovieDetails,
@@ -147,15 +148,18 @@ export function MovieDetailPage() {
               {movie.overview || t('movies.noOverview')}
             </p>
 
-            {youtubeTrailerKey && (
-              <button
-                type="button"
-                onClick={() => setTrailerKey(youtubeTrailerKey)}
-                className={`mt-6 ${theme.btnPrimary}`}
-              >
-                {t('movies.watchTrailer')}
-              </button>
-            )}
+            <div className="mt-6 flex flex-wrap items-center gap-4">
+              {youtubeTrailerKey && (
+                <button
+                  type="button"
+                  onClick={() => setTrailerKey(youtubeTrailerKey)}
+                  className={theme.btnPrimary}
+                >
+                  {t('movies.watchTrailer')}
+                </button>
+              )}
+              <WatchlistToggle media={movie} variant="detail" />
+            </div>
           </div>
         </div>
       </section>

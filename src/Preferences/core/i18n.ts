@@ -62,6 +62,39 @@ const resources = {
         tvShows: 'TV Shows',
         people: 'People',
       },
+      collection: {
+        title: 'Watchlist',
+        subtitle: 'Track movies and shows you want to watch, are watching, or have completed.',
+        addToWatchlist: 'Add {{title}} to watchlist',
+        addToWatchlistShort: 'Add to Watchlist',
+        inWatchlist: 'In Watchlist',
+        removeFromWatchlist: 'Remove {{title}} from watchlist',
+        remove: 'Remove',
+        status: {
+          label: 'Status',
+          want_to_watch: 'Want to Watch',
+          watching: 'Watching',
+          completed: 'Completed',
+        },
+        filters: {
+          all: 'All',
+        },
+        sort: {
+          label: 'Sort by',
+          dateAdded: 'Date Added',
+          title: 'Title',
+        },
+        note: {
+          label: 'Note',
+          placeholder: 'Add a personal note (max 300 characters)...',
+        },
+        empty: {
+          title: 'Your watchlist is empty',
+          description: 'Save movies and shows from browse cards or detail pages to track them here.',
+          browse: 'Browse Home',
+          filtered: 'No titles match this filter.',
+        },
+      },
       preferences: {
         title: 'Settings',
         subtitle: 'Customize your CineView experience',
@@ -139,6 +172,39 @@ const resources = {
         movies: 'Películas',
         tvShows: 'Series',
         people: 'Personas',
+      },
+      collection: {
+        title: 'Mi lista',
+        subtitle: 'Sigue películas y series que quieres ver, estás viendo o ya completaste.',
+        addToWatchlist: 'Añadir {{title}} a mi lista',
+        addToWatchlistShort: 'Añadir a mi lista',
+        inWatchlist: 'En mi lista',
+        removeFromWatchlist: 'Quitar {{title}} de mi lista',
+        remove: 'Quitar',
+        status: {
+          label: 'Estado',
+          want_to_watch: 'Por ver',
+          watching: 'Viendo',
+          completed: 'Completado',
+        },
+        filters: {
+          all: 'Todos',
+        },
+        sort: {
+          label: 'Ordenar por',
+          dateAdded: 'Fecha añadida',
+          title: 'Título',
+        },
+        note: {
+          label: 'Nota',
+          placeholder: 'Añade una nota personal (máx. 300 caracteres)...',
+        },
+        empty: {
+          title: 'Tu lista está vacía',
+          description: 'Guarda películas y series desde las tarjetas o páginas de detalle para seguirlas aquí.',
+          browse: 'Explorar inicio',
+          filtered: 'No hay títulos con este filtro.',
+        },
       },
       preferences: {
         title: 'Ajustes',

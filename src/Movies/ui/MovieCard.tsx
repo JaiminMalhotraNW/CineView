@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { WatchlistToggle } from '../../Collection/ui/WatchlistToggle'
 import { getImageUrl } from '../../Common/core/api'
 import type { Movie } from '../../Common/core/schemas'
 import { theme } from '../../Common/core/themeClasses'
@@ -38,16 +39,8 @@ export function MovieCard({ movie }: MovieCardProps) {
           {movie.title}
         </h3>
       </Link>
-      <button
-        type="button"
-        aria-label={`Add ${movie.title} to watchlist`}
-        className="absolute left-2 top-2 rounded-full bg-black/60 p-2 text-white opacity-0 transition hover:bg-red-600 group-hover:opacity-100"
-        onClick={(event) => event.preventDefault()}
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-4 w-4" aria-hidden="true">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-        </svg>
-      </button>
+
+      <WatchlistToggle media={movie} />
     </article>
   )
 }

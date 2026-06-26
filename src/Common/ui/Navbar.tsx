@@ -2,6 +2,7 @@ import { observer } from 'mobx-react-lite'
 import { useTranslation } from 'react-i18next'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { authStore } from '../../Auth/data/AuthStore'
+import { watchlistStore } from '../../Collection/data/WatchlistStore'
 import { navLinkClass, theme } from '../core/themeClasses'
 
 export const Navbar = observer(function Navbar() {
@@ -31,7 +32,14 @@ export const Navbar = observer(function Navbar() {
             {t('common.nav.search')}
           </NavLink>
           <NavLink to="/watchlist" className={navLinkClass}>
-            {t('common.nav.watchlist')}
+            <span className="inline-flex items-center gap-1.5">
+              {t('common.nav.watchlist')}
+              {watchlistStore.totalCount > 0 && (
+                <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
+                  {watchlistStore.totalCount}
+                </span>
+              )}
+            </span>
           </NavLink>
           <NavLink to="/lists" className={navLinkClass}>
             {t('common.nav.lists')}
