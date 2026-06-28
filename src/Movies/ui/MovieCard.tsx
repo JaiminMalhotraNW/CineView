@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { AddToListPopover } from '../../Collection/ui/AddToListPopover'
 import { WatchlistToggle } from '../../Collection/ui/WatchlistToggle'
 import { getImageUrl } from '../../Common/core/api'
 import type { Movie } from '../../Common/core/schemas'
@@ -41,6 +42,7 @@ export function MovieCard({ movie }: MovieCardProps) {
       </Link>
 
       <WatchlistToggle media={movie} />
+      <AddToListPopover media={movie} />
     </article>
   )
 }

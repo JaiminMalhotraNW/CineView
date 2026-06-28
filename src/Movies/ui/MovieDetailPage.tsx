@@ -8,6 +8,7 @@ import {
   getImageUrl,
 } from '../../Common/core/api'
 import { theme } from '../../Common/core/themeClasses'
+import { AddToListPopover } from '../../Collection/ui/AddToListPopover'
 import type { MovieDetails } from '../../Common/core/schemas'
 import { ContentRow } from './ContentRow'
 import { TrailerModal } from './TrailerModal'
@@ -148,17 +149,20 @@ export function MovieDetailPage() {
               {movie.overview || t('movies.noOverview')}
             </p>
 
-            <div className="mt-6 flex flex-wrap items-center gap-4">
+            <div className="mt-6 flex flex-wrap items-center gap-3">
               {youtubeTrailerKey && (
                 <button
                   type="button"
                   onClick={() => setTrailerKey(youtubeTrailerKey)}
-                  className={theme.btnPrimary}
+                  className={`${theme.btnPrimary} shadow-lg shadow-red-900/30`}
                 >
                   {t('movies.watchTrailer')}
                 </button>
               )}
-              <WatchlistToggle media={movie} variant="detail" />
+              <div className="flex flex-wrap items-center gap-2 rounded-xl border border-white/10 bg-black/20 p-1.5 backdrop-blur-sm">
+                <WatchlistToggle media={movie} variant="detail" />
+                <AddToListPopover media={movie} variant="detail" />
+              </div>
             </div>
           </div>
         </div>

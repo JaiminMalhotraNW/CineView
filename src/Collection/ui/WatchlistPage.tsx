@@ -5,7 +5,8 @@ import { Link } from 'react-router-dom'
 import { getImageUrl } from '../../Common/core/api'
 import { chipClass, theme } from '../../Common/core/themeClasses'
 import type { WatchlistFilter, WatchlistSort, WatchlistStatus } from '../core/schemas'
-import { watchlistStore } from '../data/WatchlistStore'
+import { collectionStore } from '../data/CollectionStore'
+import { NoteEditor } from './NoteEditor'
 
 const STATUS_OPTIONS: WatchlistStatus[] = [
   'want to watch',
@@ -35,8 +36,8 @@ export const WatchlistPage = observer(function WatchlistPage() {
   const [activeFilter, setActiveFilter] = useState<WatchlistFilter>('all')
   const [activeSort, setActiveSort] = useState<WatchlistSort>('dateAdded')
 
-  const entries = watchlistStore.getFilteredAndSorted(activeFilter, activeSort)
-  const counts = watchlistStore.countsByStatus
+  const entries = collectionStore.getFilteredAndSorted(activeFilter, activeSort)
+  const counts = collectionStore.countsByStatus
 
   return (
     <div className="space-y-6">
@@ -54,7 +55,7 @@ export const WatchlistPage = observer(function WatchlistPage() {
           {FILTER_OPTIONS.map((filter) => {
             const count =
               filter === 'all'
-                ? watchlistStore.totalCount
+                ? collectionStore.totalCount
                 : counts[filter]
 
             return (
@@ -85,7 +86,7 @@ export const WatchlistPage = observer(function WatchlistPage() {
         </label>
       </div>
 
-      {watchlistStore.totalCount === 0 ? (
+      {collectionStore.totalCount === 0 ? (
         <div className={`rounded-2xl p-10 text-center ${theme.card}`}>
           <h2 className={`text-xl font-semibold ${theme.heading}`}>
             {t('collection.empty.title')}
@@ -114,6 +115,10 @@ export const WatchlistPage = observer(function WatchlistPage() {
               entry.mediaType === 'movie'
                 ? `/movie/${entry.mediaId}`
                 : `/show/${entry.mediaId}`
+            const watchedEpisodes =
+              entry.mediaType === 'tv'
+                ? collectionStore.getTotalWatchedEpisodesForShow(entry.mediaId)
+                : 0
 
             return (
               <article
@@ -144,9 +149,20 @@ export const WatchlistPage = observer(function WatchlistPage() {
                     >
                       {entry.mediaSnapshot.title}
                     </h3>
-                    <span className="mt-1 inline-block rounded-full bg-red-500/10 px-2 py-0.5 text-xs font-medium text-red-500">
-                      {t(statusLabelKey(entry.status))}
-                    </span>
+
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      <span className="inline-block rounded-full bg-red-500/10 px-2 py-0.5 text-xs font-medium text-red-500">
+                        {t(statusLabelKey(entry.status))}
+                      </span>
+                      {watchedEpisodes > 0 && (
+                        <span className="inline-block rounded-full bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400">
+                          {t('collection.episodesWatched', {
+                            count: watchedEpisodes,
+                          })}
+                        </span>
+                      )}
+                    </div>
+
                     <p className={`mt-1 text-xs ${theme.hint}`}>
                       ★ {entry.mediaSnapshot.vote_average.toFixed(1)}
                     </p>
@@ -157,7 +173,7 @@ export const WatchlistPage = observer(function WatchlistPage() {
                     <select
                       value={entry.status}
                       onChange={(event) =>
-                        watchlistStore.updateStatus(
+                        collectionStore.updateStatus(
                           entry.mediaId,
                           entry.mediaType,
                           event.target.value as WatchlistStatus,
@@ -173,28 +189,16 @@ export const WatchlistPage = observer(function WatchlistPage() {
                     </select>
                   </label>
 
-                  <label className={`block text-xs ${theme.label}`}>
-                    {t('collection.note.label')}
-                    <textarea
-                      value={entry.note ?? ''}
-                      maxLength={300}
-                      rows={2}
-                      placeholder={t('collection.note.placeholder')}
-                      onChange={(event) =>
-                        watchlistStore.updateNote(
-                          entry.mediaId,
-                          entry.mediaType,
-                          event.target.value,
-                        )
-                      }
-                      className={`${theme.input} mt-1 resize-none text-xs`}
-                    />
-                  </label>
+                  <NoteEditor
+                    mediaId={entry.mediaId}
+                    mediaType={entry.mediaType}
+                    note={entry.note}
+                  />
 
                   <button
                     type="button"
                     onClick={() =>
-                      watchlistStore.removeFromWatchlist(
+                      collectionStore.removeFromWatchlist(
                         entry.mediaId,
                         entry.mediaType,
                       )

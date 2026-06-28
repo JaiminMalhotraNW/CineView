@@ -3,6 +3,8 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { getImageUrl, searchMulti } from '../../Common/core/api'
 import { theme } from '../../Common/core/themeClasses'
+import { AddToListPopover } from '../../Collection/ui/AddToListPopover'
+import { WatchlistToggle } from '../../Collection/ui/WatchlistToggle'
 import type { Movie, Person, TVShow } from '../../Common/core/schemas'
 
 const RECENT_SEARCHES_KEY = 'cineview_recent_searches'
@@ -47,21 +49,25 @@ function SearchMovieCard({ movie }: { movie: Movie }) {
   const posterUrl = getImageUrl(movie.poster_path, 'w500')
 
   return (
-    <Link to={`/movie/${movie.id}`} className="group block">
-      {posterUrl ? (
-        <img
-          src={posterUrl}
-          alt={movie.title}
-          className="aspect-[2/3] w-full rounded-lg object-cover transition group-hover:scale-[1.02]"
-          loading="lazy"
-        />
-      ) : (
-        <PosterPlaceholder label={movie.title} />
-      )}
-      <p className={`mt-2 line-clamp-2 text-sm font-medium ${theme.linkTitle}`}>
-        {movie.title}
-      </p>
-    </Link>
+    <article className="group relative">
+      <Link to={`/movie/${movie.id}`} className="block">
+        {posterUrl ? (
+          <img
+            src={posterUrl}
+            alt={movie.title}
+            className="aspect-[2/3] w-full rounded-lg object-cover transition group-hover:scale-[1.02]"
+            loading="lazy"
+          />
+        ) : (
+          <PosterPlaceholder label={movie.title} />
+        )}
+        <p className={`mt-2 line-clamp-2 text-sm font-medium ${theme.linkTitle}`}>
+          {movie.title}
+        </p>
+      </Link>
+      <WatchlistToggle media={movie} />
+      <AddToListPopover media={movie} />
+    </article>
   )
 }
 
@@ -69,21 +75,25 @@ function SearchTvCard({ show }: { show: TVShow }) {
   const posterUrl = getImageUrl(show.poster_path, 'w500')
 
   return (
-    <Link to={`/show/${show.id}`} className="group block">
-      {posterUrl ? (
-        <img
-          src={posterUrl}
-          alt={show.name}
-          className="aspect-[2/3] w-full rounded-lg object-cover transition group-hover:scale-[1.02]"
-          loading="lazy"
-        />
-      ) : (
-        <PosterPlaceholder label={show.name} />
-      )}
-      <p className={`mt-2 line-clamp-2 text-sm font-medium ${theme.linkTitle}`}>
-        {show.name}
-      </p>
-    </Link>
+    <article className="group relative">
+      <Link to={`/show/${show.id}`} className="block">
+        {posterUrl ? (
+          <img
+            src={posterUrl}
+            alt={show.name}
+            className="aspect-[2/3] w-full rounded-lg object-cover transition group-hover:scale-[1.02]"
+            loading="lazy"
+          />
+        ) : (
+          <PosterPlaceholder label={show.name} />
+        )}
+        <p className={`mt-2 line-clamp-2 text-sm font-medium ${theme.linkTitle}`}>
+          {show.name}
+        </p>
+      </Link>
+      <WatchlistToggle media={show} />
+      <AddToListPopover media={show} />
+    </article>
   )
 }
 

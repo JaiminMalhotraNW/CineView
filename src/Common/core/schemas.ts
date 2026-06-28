@@ -98,6 +98,8 @@ export type Video = z.infer<typeof VideoSchema>
 export type CastMember = z.infer<typeof CastMemberSchema>
 export type MovieDetails = z.infer<typeof MovieDetailsSchema>
 
+
+
 export const PaginatedTrendingSchema = z.object({
   page: z.number(),
   results: z.array(z.unknown()),
@@ -105,7 +107,38 @@ export const PaginatedTrendingSchema = z.object({
   total_results: z.number(),
 })
 
+export const EpisodeSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  overview: z.string(),
+  episode_number: z.number(),
+  season_number: z.number(),
+  still_path: z.string().nullable().optional(),
+  air_date: z.string().optional(),
+  vote_average: z.number().optional(),
+})
+
+export const SeasonSummarySchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  season_number: z.number(),
+  episode_count: z.number(),
+  poster_path: z.string().nullable(),
+  overview: z.string().optional(),
+})
+
+export const SeasonDetailsSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  overview: z.string(),
+  season_number: z.number(),
+  poster_path: z.string().nullable(),
+  episodes: z.array(EpisodeSchema),
+})
+
 export const TVShowDetailsSchema = TVShowSchema.extend({
+  number_of_seasons: z.number().optional(),
+  seasons: z.array(SeasonSummarySchema).optional(),
   videos: z
     .object({
       results: z.array(VideoSchema),
@@ -113,4 +146,7 @@ export const TVShowDetailsSchema = TVShowSchema.extend({
     .optional(),
 })
 
+export type Episode = z.infer<typeof EpisodeSchema>
+export type SeasonSummary = z.infer<typeof SeasonSummarySchema>
+export type SeasonDetails = z.infer<typeof SeasonDetailsSchema>
 export type TVShowDetails = z.infer<typeof TVShowDetailsSchema>

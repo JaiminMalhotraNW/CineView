@@ -1,18 +1,27 @@
 import { observer } from 'mobx-react-lite'
+import type { MouseEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { theme } from '../../Common/core/themeClasses'
 import {
   getWatchlistMediaTitle,
   getWatchlistMediaType,
   type WatchlistMedia,
 } from '../core/media'
-import { watchlistStore } from '../data/WatchlistStore'
+import { collectionStore } from '../data/CollectionStore'
 
 type WatchlistToggleProps = {
   media: WatchlistMedia
   variant?: 'card' | 'detail'
   className?: string
 }
+
+const detailBaseClass =
+  'inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-semibold transition duration-200'
+
+const detailInactiveClass =
+  'border-white/25 bg-black/40 text-white backdrop-blur-sm hover:border-white/40 hover:bg-black/55'
+
+const detailActiveClass =
+  'border-red-500/60 bg-red-600/25 text-red-300 shadow-lg shadow-red-900/20 hover:bg-red-600/35'
 
 export const WatchlistToggle = observer(function WatchlistToggle({
   media,
@@ -23,26 +32,21 @@ export const WatchlistToggle = observer(function WatchlistToggle({
 
   const mediaType = getWatchlistMediaType(media)
   const title = getWatchlistMediaTitle(media)
-  const isActive = watchlistStore.isInWatchlist(media.id, mediaType)
+  const isActive = collectionStore.isInWatchlist(media.id, mediaType)
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault()
     event.stopPropagation()
-    watchlistStore.toggleWatchlist(media)
+    collectionStore.toggleWatchlist(media)
   }
 
-  const baseClass =
-    variant === 'card'
-      ? 'absolute left-2 top-2 rounded-full bg-black/60 p-2 text-white opacity-0 transition group-hover:opacity-100 hover:bg-black/80'
-      : `inline-flex ite  ms-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition ${theme.chipInactive}`
+  const cardClass = isActive
+    ? 'absolute left-2 top-2 rounded-full bg-red-600/90 p-2 text-white opacity-100 shadow-lg shadow-red-900/30 transition hover:bg-red-500'
+    : 'absolute left-2 top-2 rounded-full bg-black/60 p-2 text-white opacity-0 transition group-hover:opacity-100 hover:bg-black/80'
 
-  const activeClass = isActive
-    ? variant === 'card'
-      ? 'text-red-500 opacity-100'
-      : 'border-red-500 text-red-500'
-    : variant === 'card'
-      ? 'text-white'
-      : ''
+  const detailClass = `${detailBaseClass} ${
+    isActive ? detailActiveClass : detailInactiveClass
+  }`
 
   return (
     <button
@@ -54,7 +58,7 @@ export const WatchlistToggle = observer(function WatchlistToggle({
           : t('collection.addToWatchlist', { title })
       }
       aria-pressed={isActive}
-      className={`${baseClass} ${activeClass} ${className}`.trim()}
+      className={`${variant === 'card' ? cardClass : detailClass} ${className}`.trim()}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"

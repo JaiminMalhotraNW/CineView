@@ -1,7 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom'
 import { LoginPage, ProtectedRoute } from './Auth'
 import { NotFoundPage, ShellLayout } from './Common'
-import { WatchlistPage, CustomListsPage } from './Collection'
+import { WatchlistPage, CustomListsPage, ListDetailPage } from './Collection'
 import { HomePage, MovieDetailPage } from './Movies'
 import { SettingsPage } from './Preferences'
 import { SearchPage } from './Search'
@@ -27,6 +27,7 @@ export const router = createBrowserRouter([
       { path: 'search', element: <SearchPage /> },
       { path: 'watchlist', element: <WatchlistPage /> },
       { path: 'lists', element: <CustomListsPage /> },
+      { path: 'lists/:listId', element: <ListDetailPage /> },
       { path: 'settings', element: <SettingsPage /> },
     ],
   },

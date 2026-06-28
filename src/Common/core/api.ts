@@ -11,6 +11,8 @@ import {
   PersonSchema,
   TVShowDetailsSchema,
   TVShowSchema,
+  SeasonDetailsSchema,
+  type SeasonDetails,
   type Genre,
   type Movie,
   type MovieDetails,
@@ -236,6 +238,16 @@ export async function fetchTVShowDetails(id: number): Promise<TVShowDetails> {
   return tmdbFetch(
     `/tv/${id}?append_to_response=videos`,
     TVShowDetailsSchema,
+  )
+}
+
+export async function fetchSeasonDetails(
+  showId: number,
+  seasonNumber: number,
+): Promise<SeasonDetails> {
+  return tmdbFetch(
+    `/tv/${showId}/season/${seasonNumber}`,
+    SeasonDetailsSchema,
   )
 }
 
